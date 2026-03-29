@@ -830,12 +830,48 @@ const WF_LineItem = ({ name, qty, unit, cost, price, total, margin, highlight = 
   </tr>
 );
 
+const TAB_DATA = [
+  {
+    label: "Option A", total: "$19,927",
+    sections: [
+      { label: "Scope of Work", subtotal: "$9,212", items: [
+        { name: "GAF Timberline HDZ Shingles", qty: "24", unit: "SQ", cost: "120", price: "230", total: "5,520", margin: 48 },
+        { name: "Ice & Water Shield", qty: "4", unit: "SQ", cost: "45", price: "95", total: "380", margin: 53 },
+        { name: "Synthetic Underlayment", qty: "24", unit: "SQ", cost: "22", price: "48", total: "1,152", margin: 54 },
+        { name: "Ridge Cap Shingles", qty: "120", unit: "LF", cost: "3.20", price: "7.50", total: "900", margin: 57 },
+        { name: "Drip Edge — Eave", qty: "180", unit: "LF", cost: "1.80", price: "4.20", total: "756", margin: 57 },
+        { name: "Pipe Boot Flashings", qty: "4", unit: "EA", cost: "28", price: "85", total: "340", margin: 67 },
+      ]},
+      { label: "Additional Work", subtotal: "$2,300", items: [
+        { name: "Flashing Replacement", qty: "1", unit: "EA", cost: "180", price: "450", total: "450", margin: 60 },
+        { name: "Decking Replacement (OSB)", qty: "4", unit: "SQ", cost: "95", price: "220", total: "880", margin: 57 },
+        { name: "Skylight Flashing Kit", qty: "2", unit: "EA", cost: "145", price: "345", total: "690", margin: 58 },
+        { name: "Dumpster / Haul-away", qty: "1", unit: "EA", cost: "95", price: "280", total: "280", margin: 66 },
+      ]},
+    ],
+    subtotal: "$18,400", tax: "$1,527", finalTotal: "$19,927", margin: "38%",
+  },
+  {
+    label: "Option B", total: "$14,685",
+    sections: [
+      { label: "Scope of Work", subtotal: "$7,674", items: [
+        { name: "CertainTeed Landmark Pro Shingles", qty: "24", unit: "SQ", cost: "135", price: "250", total: "6,000", margin: 46 },
+        { name: "Ice & Water Shield", qty: "6", unit: "SQ", cost: "45", price: "95", total: "570", margin: 53 },
+        { name: "Synthetic Underlayment", qty: "24", unit: "SQ", cost: "22", price: "46", total: "1,104", margin: 52 },
+      ]},
+    ],
+    subtotal: "$13,560", tax: "$1,125", finalTotal: "$14,685", margin: "33%",
+  },
+  {
+    label: "Option C", total: "—",
+    sections: [],
+    subtotal: "—", tax: "—", finalTotal: "—", margin: "—", empty: true,
+  },
+];
+
 function ExistingQuoteWireframe({ onBack }) {
-  const tabs = [
-    { label: "Option A", total: "$19,927", active: true },
-    { label: "Option B", total: "$14,560", active: false },
-    { label: "Option C", total: "—", active: false },
-  ];
+  const [activeTab, setActiveTab] = useState(0);
+  const tab = TAB_DATA[activeTab];
 
   return (
     <div className="flex flex-col h-full">
@@ -878,14 +914,14 @@ function ExistingQuoteWireframe({ onBack }) {
 
           {/* Tab bar */}
           <div className="bg-zinc-900/60 border-b border-zinc-800 px-5 flex items-center flex-shrink-0">
-            {tabs.map((tab, i) => (
-              <div key={tab.label}
-                className={`px-4 py-2.5 text-sm font-medium border-b-2 select-none ${tab.active ? "border-blue-500 text-blue-400" : "border-transparent text-zinc-500"}`}>
-                {tab.label}
-                <span className="ml-2 text-[11px] font-mono opacity-60">{tab.total}</span>
-              </div>
+            {TAB_DATA.map((t, i) => (
+              <button key={t.label} onClick={() => setActiveTab(i)}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === i ? "border-blue-500 text-blue-400" : "border-transparent text-zinc-500 hover:text-zinc-300"}`}>
+                {t.label}
+                <span className="ml-2 text-[11px] font-mono opacity-60">{t.total}</span>
+              </button>
             ))}
-            <div className="ml-2 p-1.5 text-zinc-700">
+            <div className="ml-2 p-1.5 text-zinc-700 cursor-pointer hover:text-zinc-500 transition-colors">
               <Icon d={Icons.plus} size={13} />
             </div>
           </div>
@@ -916,93 +952,92 @@ function ExistingQuoteWireframe({ onBack }) {
               </div>
             </div>
 
-            {/* Section 1: Scope of Work */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-zinc-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="text-zinc-600 cursor-grab"><Icon d="M9 3h1 M9 9h1 M9 15h1 M14 3h1 M14 9h1 M14 15h1" size={13} /></div>
-                  <span className="text-[13px] font-semibold text-zinc-100">Scope of Work</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-zinc-500 font-mono">Section subtotal</span>
-                  <span className="text-sm font-mono text-zinc-200">$9,212</span>
-                  <button className="text-[11px] text-zinc-600 hover:text-zinc-400 border border-zinc-700 rounded px-2 py-0.5 transition-colors">Hide subtotal</button>
-                </div>
+            {/* Empty tab state */}
+            {tab.empty && (
+              <div className="border-2 border-dashed border-zinc-800 rounded-xl py-16 flex flex-col items-center justify-center gap-3 text-zinc-700">
+                <Icon d={Icons.file} size={28} />
+                <p className="text-sm font-medium">This tab is empty</p>
+                <p className="text-[12px] text-zinc-600">Add a section to start building this option</p>
+                <button className="mt-1 flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[13px] font-medium px-4 py-2 rounded-lg transition-colors">
+                  <Icon d={Icons.plus} size={13} /> Add Section
+                </button>
               </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-800/60">
-                    {["Item","Qty","Unit","Our Cost","Unit Price","Line Total",""].map(h => (
-                      <th key={h} className={`text-left text-[10px] text-zinc-600 font-medium px-${h === "" ? "2" : h === "Qty" || h === "Unit" ? "2" : h === "Our Cost" || h === "Unit Price" ? "3" : "4"} py-2 uppercase tracking-wider whitespace-nowrap`}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <WF_LineItem name="GAF Timberline HDZ Shingles" qty="24" unit="SQ" cost="120" price="230" total="5,520" margin={48} />
-                  <WF_LineItem name="Ice & Water Shield" qty="4" unit="SQ" cost="45" price="95" total="380" margin={53} />
-                  <WF_LineItem name="Synthetic Underlayment" qty="24" unit="SQ" cost="22" price="48" total="1,152" margin={54} />
-                  <WF_LineItem name="Ridge Cap Shingles" qty="120" unit="LF" cost="3.20" price="7.50" total="900" margin={57} />
-                  <WF_LineItem name="Drip Edge — Eave" qty="180" unit="LF" cost="1.80" price="4.20" total="756" margin={57} />
-                  <WF_LineItem name="Pipe Boot Flashings" qty="4" unit="EA" cost="28" price="85" total="340" margin={67} />
-                  <tr className="border-b border-zinc-800/40">
-                    <td colSpan={7} className="px-4 py-2">
-                      <button className="flex items-center gap-1.5 text-[12px] text-zinc-600 hover:text-blue-400 transition-colors">
-                        <Icon d={Icons.plus} size={12} /> Add line item
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            )}
 
-            {/* Section 2: Additional Work */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-zinc-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="text-zinc-600 cursor-grab"><Icon d="M9 3h1 M9 9h1 M9 15h1 M14 3h1 M14 9h1 M14 15h1" size={13} /></div>
-                  <span className="text-[13px] font-semibold text-zinc-100">Additional Work</span>
+            {/* Sections */}
+            {!tab.empty && tab.sections.map((section, si) => (
+              <div key={section.label} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-zinc-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="text-zinc-600 cursor-grab"><Icon d="M9 3h1 M9 9h1 M9 15h1 M14 3h1 M14 9h1 M14 15h1" size={13} /></div>
+                    <span className="text-[13px] font-semibold text-zinc-100">{section.label}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-mono text-zinc-200">{section.subtotal}</span>
+                    <button className="text-[11px] text-zinc-600 hover:text-zinc-400 border border-zinc-700 rounded px-2 py-0.5 transition-colors">Hide subtotal</button>
+                    <button className="text-zinc-600 hover:text-zinc-400 transition-colors"><Icon d={Icons.x} size={13} /></button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-mono text-zinc-200">$2,164</span>
-                  <button className="text-[11px] text-zinc-600 hover:text-zinc-400 border border-zinc-700 rounded px-2 py-0.5 transition-colors">Hide subtotal</button>
-                </div>
-              </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-800/60">
-                    {["Item","Qty","Unit","Our Cost","Unit Price","Line Total",""].map(h => (
-                      <th key={h} className="text-left text-[10px] text-zinc-600 font-medium px-4 py-2 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-800/60">
+                      {["Item","Qty","Unit","Our Cost","Unit Price","Line Total",""].map(h => (
+                        <th key={h} className="text-left text-[10px] text-zinc-600 font-medium px-4 py-2 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {section.items.map((item, ii) => (
+                      <tr key={ii} className="border-b border-zinc-800/40 hover:bg-zinc-800/30 transition-colors group">
+                        <td className="px-4 py-2.5 text-[12px] text-zinc-200">{item.name}</td>
+                        <td className="px-3 py-2.5">
+                          <div className="w-14 bg-zinc-800/60 border border-zinc-700/60 rounded px-2 py-1 text-[12px] text-zinc-300 text-right">{item.qty}</div>
+                        </td>
+                        <td className="px-2 py-2.5 text-[12px] text-zinc-500">{item.unit}</td>
+                        <td className="px-3 py-2.5 text-[12px] font-mono text-zinc-500">${item.cost}</td>
+                        <td className="px-3 py-2.5">
+                          <div className="w-20 bg-zinc-800/60 border border-zinc-700/60 rounded px-2 py-1 text-[12px] text-zinc-300 text-right">${item.price}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className="text-[12px] font-mono text-zinc-100">${item.total}</span>
+                          <span className={`ml-2 text-[10px] font-mono ${item.margin >= 50 ? "text-emerald-400" : item.margin >= 35 ? "text-zinc-500" : "text-amber-400"}`}>{item.margin}%</span>
+                        </td>
+                        <td className="px-2 py-2.5">
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="p-1 rounded hover:bg-zinc-700 text-zinc-500 cursor-pointer transition-colors"><Icon d={Icons.copy} size={11} /></div>
+                            <div className="p-1 rounded hover:bg-zinc-700 text-zinc-500 hover:text-red-400 cursor-pointer transition-colors"><Icon d={Icons.x} size={11} /></div>
+                          </div>
+                        </td>
+                      </tr>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <WF_LineItem name="Flashing Replacement" qty="1" unit="EA" cost="180" price="450" total="450" margin={60} />
-                  <WF_LineItem name="Decking Replacement (OSB)" qty="4" unit="SQ" cost="95" price="220" total="880" margin={57} />
-                  <WF_LineItem name="Skylight Flashing Kit" qty="2" unit="EA" cost="145" price="345" total="690" margin={58} highlight />
-                  <WF_LineItem name="Dumpster / Haul-away" qty="1" unit="EA" cost="95" price="280" total="280" margin={66} />
-                  <tr className="border-b border-zinc-800/40">
-                    <td colSpan={7} className="px-4 py-2">
-                      <button className="flex items-center gap-1.5 text-[12px] text-zinc-600 hover:text-blue-400 transition-colors">
-                        <Icon d={Icons.plus} size={12} /> Add line item
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    <tr>
+                      <td colSpan={7} className="px-4 py-2.5">
+                        <button className="flex items-center gap-1.5 text-[12px] text-zinc-600 hover:text-blue-400 transition-colors">
+                          <Icon d={Icons.plus} size={12} /> Add line item from price list
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ))}
 
             {/* Add section */}
-            <button className="flex items-center gap-2 w-full border border-dashed border-zinc-700 rounded-xl py-3 justify-center text-[13px] text-zinc-600 hover:border-zinc-500 hover:text-zinc-400 transition-colors">
-              <Icon d={Icons.plus} size={14} /> Add section
-            </button>
+            {!tab.empty && (
+              <button className="flex items-center gap-2 w-full border border-dashed border-zinc-700 rounded-xl py-3 justify-center text-[13px] text-zinc-600 hover:border-zinc-500 hover:text-zinc-400 transition-colors">
+                <Icon d={Icons.plus} size={14} /> Add section
+              </button>
+            )}
 
             {/* Customer-facing notes */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-2">Customer-Facing Notes</label>
-              <div className="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg px-3 py-2.5 text-[12px] text-zinc-400 min-h-[56px] select-none">
-                All materials are manufacturer-spec. Work area will be protected and cleaned daily. Estimated duration: 2–3 days weather permitting.
+            {!tab.empty && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-2">Customer-Facing Notes</label>
+                <div className="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-lg px-3 py-2.5 text-[12px] text-zinc-400 min-h-[56px] select-none">
+                  All materials are manufacturer-spec. Work area will be protected and cleaned daily. Estimated duration: 2–3 days weather permitting.
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -1044,11 +1079,11 @@ function ExistingQuoteWireframe({ onBack }) {
 
             {/* Summary */}
             <div>
-              <h3 className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest mb-2.5">Summary — Option A</h3>
+              <h3 className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest mb-2.5">Summary — {TAB_DATA[activeTab].label}</h3>
               <div className="space-y-1.5 text-[12px]">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Subtotal</span>
-                  <span className="font-mono text-zinc-200">$18,400</span>
+                  <span className="font-mono text-zinc-200">{TAB_DATA[activeTab].subtotal}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-zinc-500">Discount</span>
@@ -1059,16 +1094,16 @@ function ExistingQuoteWireframe({ onBack }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Tax (8.3%)</span>
-                  <span className="font-mono text-zinc-400">$1,527</span>
+                  <span className="font-mono text-zinc-400">{TAB_DATA[activeTab].tax}</span>
                 </div>
                 <div className="h-px bg-zinc-700 my-1" />
                 <div className="flex justify-between font-semibold">
                   <span className="text-zinc-300">Total</span>
-                  <span className="font-mono text-emerald-400">$19,927</span>
+                  <span className="font-mono text-emerald-400">{TAB_DATA[activeTab].finalTotal}</span>
                 </div>
                 <div className="flex justify-between pt-1">
                   <span className="text-zinc-600 text-[11px]">Overall margin</span>
-                  <span className="text-emerald-400 text-[11px] font-mono font-semibold">38%</span>
+                  <span className="text-emerald-400 text-[11px] font-mono font-semibold">{TAB_DATA[activeTab].margin}</span>
                 </div>
               </div>
             </div>
